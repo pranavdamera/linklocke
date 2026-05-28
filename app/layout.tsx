@@ -9,8 +9,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Linklocke Tracker — Ototos Unova Run',
-  description: 'Pokémon Black & White Linklocke tracker for P, Chach, and Cheek.',
+  title: 'Linklocke Tracker — Unova Run',
+  description: 'Pokémon Black & White 3-player Linklocke tracker.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

@@ -37,7 +37,7 @@ export default async function HomePage() {
             {[
               { icon: <Link2 className="h-5 w-5 text-blue-400" />,  title: 'Linked Deaths',     desc: 'One dies, all die. Automatically.' },
               { icon: <MapPin className="h-5 w-5 text-green-400" />, title: 'Route Tracker',     desc: 'All Unova BW locations in order.' },
-              { icon: <Users className="h-5 w-5 text-purple-400" />, title: '3-Player Support',  desc: 'P, Chach, and Cheek.' },
+              { icon: <Users className="h-5 w-5 text-purple-400" />, title: '3-Player Support',  desc: 'Three linked runs, one shared tracker.' },
               { icon: <Skull className="h-5 w-5 text-red-400" />,    title: 'Graveyard',         desc: 'Honor the fallen with full death logs.' },
               { icon: <Shield className="h-5 w-5 text-yellow-400" />, title: 'Live Updates',      desc: 'Realtime sync across all devices.' },
               { icon: <Swords className="h-5 w-5 text-orange-400" />, title: 'House Rules',       desc: 'Dupes clause, shiny clause & more.' },
@@ -60,7 +60,7 @@ export default async function HomePage() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Made for the Ototos. Dark mode. Mobile-first. No spoilers.
+            Dark mode. Mobile-first. No spoilers.
           </p>
         </div>
       </main>

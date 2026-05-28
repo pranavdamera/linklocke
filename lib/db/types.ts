@@ -267,11 +267,14 @@ export interface UndoDeathInput {
 // UI / DISPLAY TYPES
 // ============================================================
 
-export const PLAYER_NAMES: Record<PlayerSlot, string> = {
-  1: 'P',
-  2: 'Chach',
-  3: 'Cheek',
+export const PLAYER_SLOT_LABELS: Record<PlayerSlot, string> = {
+  1: 'Player 1',
+  2: 'Player 2',
+  3: 'Player 3',
 }
+
+// Kept for backward compat — prefer profile.display_name at runtime
+export const PLAYER_NAMES = PLAYER_SLOT_LABELS
 
 export const PLAYER_COLORS: Record<PlayerSlot, string> = {
   1: '#60a5fa', // blue-400

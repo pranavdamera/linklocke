@@ -8,7 +8,7 @@ import { formatDateTime, timeAgo } from '@/lib/utils'
 import { UndoDeathButton } from './UndoDeathButton'
 import type { Profile, PlayerSlot } from '@/lib/db/types'
 
-const SLOT_NAME: Record<PlayerSlot, string> = { 1: 'P', 2: 'Chach', 3: 'Cheek' }
+// Slot labels are resolved from profile.display_name at runtime
 const SLOT_COLOR: Record<PlayerSlot, string> = {
   1: 'text-blue-400', 2: 'text-green-400', 3: 'text-purple-400',
 }

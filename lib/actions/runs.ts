@@ -24,7 +24,6 @@ export async function createRun(input: CreateRunInput) {
 
   const data = parsed.data
 
-  // Create run
   const { data: run, error: runError } = await supabase
     .from('runs')
     .insert({ name: data.name, game: data.game, region: data.region, created_by: user.id })
@@ -33,7 +32,6 @@ export async function createRun(input: CreateRunInput) {
 
   if (runError || !run) return { error: { _root: [runError?.message ?? 'Failed to create run'] } }
 
-  // Add players
   for (const player of data.players) {
     await supabase.from('run_players').insert({
       run_id: run.id,
@@ -44,7 +42,6 @@ export async function createRun(input: CreateRunInput) {
     })
   }
 
-  // Seed badges
   for (const badge of UNOVA_BADGES) {
     await supabase.from('badges').insert({
       run_id: run.id,
@@ -56,13 +53,11 @@ export async function createRun(input: CreateRunInput) {
     })
   }
 
-  // Seed rules
   const rules = getDefaultRules()
   for (const rule of rules) {
     await supabase.from('rules').insert({ run_id: run.id, ...rule })
   }
 
-  // Seed run_locations from all encounter-area locations
   const { data: locations } = await supabase
     .from('locations')
     .select('id, order_index, badge_gate')
@@ -80,7 +75,6 @@ export async function createRun(input: CreateRunInput) {
     }
   }
 
-  // Log creation
   await supabase.from('activity_log').insert({
     run_id: run.id,
     actor_id: user.id,
@@ -91,6 +85,70 @@ export async function createRun(input: CreateRunInput) {
 
   revalidatePath('/dashboard')
   return { success: true, run_id: run.id }
+}
+
+export async function joinRun(runId: string): Promise<{ success: true; run_name: string } | { error: string }> {
+  const supabase = createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, display_name, player_slot')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Set up your profile in Settings before joining a run.' }
+
+  const { data: run } = await supabase
+    .from('runs')
+    .select('id, name, status')
+    .eq('id', runId.trim())
+    .single()
+
+  if (!run) return { error: 'Run not found. Double-check the code and try again.' }
+  if (run.status !== 'active') return { error: 'This run is no longer active.' }
+
+  // Already a member?
+  const { data: alreadyIn } = await supabase
+    .from('run_players')
+    .select('id')
+    .eq('run_id', runId)
+    .eq('profile_id', user.id)
+    .single()
+
+  if (alreadyIn) return { error: "You're already in this run." }
+
+  // Slot taken by someone else?
+  const { data: slotTaken } = await supabase
+    .from('run_players')
+    .select('id, profile_id')
+    .eq('run_id', runId)
+    .eq('slot', profile.player_slot)
+    .single()
+
+  if (slotTaken) {
+    return { error: `Slot ${profile.player_slot} is already taken. Go to Settings and pick a different slot first.` }
+  }
+
+  await supabase.from('run_players').insert({
+    run_id: runId,
+    profile_id: user.id,
+    player_name: profile.display_name,
+    slot: profile.player_slot,
+    game_version: 'Black',
+  })
+
+  await supabase.from('activity_log').insert({
+    run_id: runId,
+    actor_id: user.id,
+    event_type: 'run_created',
+    message: `${profile.display_name} joined the run`,
+    metadata: { slot: profile.player_slot },
+  })
+
+  revalidatePath('/dashboard')
+  return { success: true, run_name: run.name }
 }
 
 export async function getActiveRun() {
@@ -134,7 +192,6 @@ export async function updateBadge(runId: string, badgeNumber: number, obtained: 
 
   if (error) return { error: error.message }
 
-  // Update run badge count
   const { data: badges } = await supabase
     .from('badges')
     .select('obtained')
@@ -147,9 +204,7 @@ export async function updateBadge(runId: string, badgeNumber: number, obtained: 
     run_id: runId,
     actor_id: user.id,
     event_type: 'badge_update',
-    message: obtained
-      ? `Badge ${badgeNumber} obtained!`
-      : `Badge ${badgeNumber} removed`,
+    message: obtained ? `Badge ${badgeNumber} obtained!` : `Badge ${badgeNumber} removed`,
     metadata: { badge_number: badgeNumber, obtained },
   })
 

@@ -11,10 +11,10 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type { Profile, PlayerSlot } from '@/lib/db/types'
 
-const PLAYER_SLOTS: { slot: PlayerSlot; name: string; color: string }[] = [
-  { slot: 1, name: 'P',     color: 'text-blue-400' },
-  { slot: 2, name: 'Chach', color: 'text-green-400' },
-  { slot: 3, name: 'Cheek', color: 'text-purple-400' },
+const PLAYER_SLOTS: { slot: PlayerSlot; color: string }[] = [
+  { slot: 1, color: 'text-blue-400' },
+  { slot: 2, color: 'text-green-400' },
+  { slot: 3, color: 'text-purple-400' },
 ]
 
 export function ProfileSetup({ profile, userId }: { profile: Profile | null; userId: string }) {
@@ -54,7 +54,7 @@ export function ProfileSetup({ profile, userId }: { profile: Profile | null; use
           <Input
             value={displayName}
             onChange={e => setDisplayName(e.target.value)}
-            placeholder="e.g. P, Chach, or Cheek"
+            placeholder="Your name"
           />
         </div>
 
@@ -66,7 +66,7 @@ export function ProfileSetup({ profile, userId }: { profile: Profile | null; use
               <SelectContent>
                 {PLAYER_SLOTS.map(s => (
                   <SelectItem key={s.slot} value={String(s.slot)}>
-                    <span className={s.color}>{s.name}</span> — Slot {s.slot}
+                    <span className={s.color}>Slot {s.slot}</span>
                   </SelectItem>
                 ))}
               </SelectContent>

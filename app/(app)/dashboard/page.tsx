@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import Link from 'next/link'
-import { Award, MapPin, ArrowRight, Plus, Skull } from 'lucide-react'
+import { Award, MapPin, ArrowRight, Plus, Skull, Users } from 'lucide-react'
+import { InviteCode } from './InviteCode'
 import type { Profile, PokemonEncounter, PlayerSlot } from '@/lib/db/types'
 import { UNOVA_BADGES } from '@/lib/pokemon/badges-bw'
 import { CreateRunForm } from './CreateRunForm'
@@ -126,6 +127,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <Badge variant={run.status === 'active' ? 'alive' : 'boxed'} className="capitalize">{run.status}</Badge>
             <span className="text-sm text-muted-foreground">Pokémon {run.game.replace('pokemon_', '').replace(/_/g, ' ')}</span>
+            <span className="text-sm text-muted-foreground">{players.length}/3 players</span>
           </div>
         </div>
         <Link href="/routes">
@@ -134,6 +136,11 @@ export default async function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Invite code — shown when run isn't full */}
+      {players.length < 3 && (
+        <InviteCode runId={run.id} runName={run.name} />
+      )}
 
       {/* Badge bar */}
       <Card className="bg-card/60">
