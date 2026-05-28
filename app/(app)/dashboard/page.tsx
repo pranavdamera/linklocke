@@ -13,6 +13,7 @@ import { InviteCode } from './InviteCode'
 import type { Profile, PokemonEncounter, PlayerSlot } from '@/lib/db/types'
 import { UNOVA_BADGES } from '@/lib/pokemon/badges-bw'
 import { CreateRunForm } from './CreateRunForm'
+import { UnovaMap } from '@/components/UnovaMap'
 
 export default async function DashboardPage() {
   const supabase = createServerClient()
@@ -60,10 +61,10 @@ export default async function DashboardPage() {
     )
   }
 
-  // Get all encounters for this run
+  // Get all encounters for this run (include location order_index for map positioning)
   const { data: encounters } = await supabase
     .from('pokemon_encounters')
-    .select('*, player:profiles(id, display_name, player_slot)')
+    .select('*, player:profiles(id, display_name, player_slot), location:locations(id, name, order_index, slug)')
     .eq('run_id', run.id)
 
   // Get run_locations for progress
@@ -118,6 +119,21 @@ export default async function DashboardPage() {
   const nextBadge = (badges ?? []).find(b => !b.obtained)
   const routePercent = stats.routesTotal ? Math.round((stats.routesComplete / stats.routesTotal) * 100) : 0
 
+  // Build per-player map positions from max order_index of their encounters
+  const playerPositions = players.map(p => {
+    const pe = (encounters ?? []).filter((e: any) => e.player_id === p.id)
+    let maxOrder = 0
+    let locationName = 'Not started'
+    for (const e of pe) {
+      const loc = Array.isArray(e.location) ? e.location[0] : e.location
+      if (loc?.order_index > maxOrder) {
+        maxOrder = loc.order_index
+        locationName = loc.name
+      }
+    }
+    return { player: p, maxOrderIndex: maxOrder, locationName }
+  })
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
       {/* Run header */}
@@ -141,6 +157,12 @@ export default async function DashboardPage() {
       {players.length < 3 && (
         <InviteCode runId={run.id} runName={run.name} />
       )}
+
+      {/* Unova map */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Map</h2>
+        <UnovaMap playerPositions={playerPositions} badgeCount={run.badge_count ?? 0} />
+      </div>
 
       {/* Badge bar */}
       <Card className="bg-card/60">
